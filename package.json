@@ -1,0 +1,30 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start-dev": "nodemon -e ts,json src/server.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RigobertoCaionda/Tech-blog-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RigobertoCaionda/Tech-blog-backend/issues"
+  },
+  "homepage": "https://github.com/RigobertoCaionda/Tech-blog-backend#readme",
+  "devDependencies": {
+    "@types/cors": "^2.8.12",
+    "@types/express": "^4.17.13",
+    "@types/node": "^17.0.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.2"
+  }
+}
