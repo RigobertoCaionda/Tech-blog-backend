@@ -23,6 +23,12 @@ export default {
 				options: { min: 8 }
 			},
 			errorMessage: 'Senha precisa ter 8 caracteres no minimo'
+		},
+		confirmPassword: {
+			isLength: {
+				options: { min: 8 }
+			},
+			errorMessage: 'Confirmar senha precisa ter 8 caracteres no minimo'
 		}
 	}),
 	signin: checkSchema({
