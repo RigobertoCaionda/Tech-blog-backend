@@ -7,7 +7,7 @@ import apiRoutes from './routes/api';
 
 dotenv.config();
 
-mongoConnect();//Verificando se esta ou nao conectado ao db, nova forma
+mongoConnect();//funcao que verifica se estamos devidamente conectados ao mongo
 
 const server = express();
 
