@@ -5,7 +5,6 @@ type UserType = {
 	email: string,
 	gender: string,
 	password: string,
-	confirmPassword: string,
 	token: string
 };
 
@@ -14,7 +13,6 @@ const schema = new Schema<UserType>({
 	email: { type: String, required: true },
 	gender: { type: String, required: true },
 	password: { type: String, required: true },
-	confirmPassword: { type: String, required: true },
 	token: String
 });
 

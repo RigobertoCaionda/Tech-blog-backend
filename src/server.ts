@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import { resolve } from 'path';
+import fileupload from 'express-fileupload';
 import {mongoConnect} from './database/mongo';
 import apiRoutes from './routes/api';
 
@@ -14,6 +15,7 @@ const server = express();
 server.use(cors());
 server.use(express.json());
 server.use(express.urlencoded({ extended: true }));
+server.use(fileupload());//Para poder receber arquivos, e um middleware
 server.use('/file', express.static(resolve(__dirname, '../public/media')));
 server.use('/', apiRoutes);
 
@@ -25,5 +27,3 @@ server.use((req: Request, res: Response) => {
 server.listen(process.env.PORT, () => {
 	console.log(`Rodando no endereço ${process.env.BASE}`);
 });
-
-//Ver o endpoint nao encontrado e ver o server e instalar coisas
