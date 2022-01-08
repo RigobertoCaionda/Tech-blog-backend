@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import User from '../models/User';
 import Post from '../models/Post';
+import Like from '../models/Like';
 
 export const getAll = async () => {
 
@@ -39,17 +40,23 @@ export const insert = async (req: Request, res: Response) => {
 	newPost.text = text;
 	newPost.likes = 0;
 	newPost.views = 0;
-	newPost.userId = user._id;//Nao preciso confirmar se user.id existe pq se o user chegou aqui eu ja confio que ele tem token valido, senao seria parado pelo Auth.private
+	newPost.userId = user._id;//Nao preciso confirmar se user.id existe pq se o user chegou aqui eu ja confio que ele tem token valido, senao seria parado pelo Auth.privateRoute
 	newPost.dateCreated = new Date();
-	newPost.likedByUsers = [];
 
 	const info = await newPost.save();
+
+	//Salvando o registro na tabela de likes
+	const newLikeData = new Like();
+	newLikeData.postId = info._id;
+	newLikeData.likedByUsers = [];
+	await newLikeData.save();
+
 	res.json({ id: info._id });
 }
 
 export const getPost = async (req: Request, res: Response) => {
 	let { id } = req.params;
-	let { token } = req.query;//Apesar dessa rota nao precisar de token, eu vou enviar ainda assim
+	let { token } = req.query;//Se tiver token, ai sim eu verifico se esse user curtiu o post
 
 	if (!id) {
 		res.json({ data: { error: 'Nenhum post selecionado' } });
@@ -71,12 +78,14 @@ export const getPost = async (req: Request, res: Response) => {
 	post.views++;
 	await post.save();
 
-	if (token && token !== '') {
+	const like = await Like.findOne({ postId: post._id }).exec();
+
+	if (like) {//E suposto que sempre ache uma correspondencia na tabela like, por isso nao tem else
 		const user = await User.findOne({ token }).exec();
+
 		if (user) {
 			let userLiked: boolean = false;
-
-			if(post.likedByUsers.includes(user._id)) {
+			if (like.likedByUsers.includes(user._id)) {
 				userLiked = true;
 			}
 
@@ -113,24 +122,6 @@ export const getPost = async (req: Request, res: Response) => {
 			return;	
 		}
 	}
-
-	if (!token || token === '') {
-			res.json({ 
-				data: {
-					id: post._id,
-					title: post.title,
-					dateCreated: post.dateCreated,
-					desc: post.desc,
-					subject: post.subject,
-					text: post.text,
-					likedByUsers: post.likedByUsers,
-					userLiked: false,
-					views: post.views,
-					likes: post.likes
-				}
-			 });
-			return;		
-		}
 }
 
 export const like = async (req: Request, res: Response) => {
@@ -154,14 +145,23 @@ export const like = async (req: Request, res: Response) => {
 		return;
 	}
 
-	const user = await User.findOne({ token }).exec();
+	const like = await Like.findOne({ postId: post._id }).exec();// E suposto que sempre ache algum item aqui
 
-	if (!post.likedByUsers.includes(user._id)) {
-		post.likedByUsers.push(user._id);
-		post.likes++;
+	if (like) {
+		const user = await User.findOne({ token }).exec();
+
+		if (!like.likedByUsers.includes(user._id)) {
+			like.likedByUsers.push(user._id);
+			post.likes++;
+			//Salvando o like
+			await like.save();
+			//Salvando o post
+			await post.save();
+		}
+
+		res.json({ data: { status: true } });
+		return;
 	}
 
-	await post.save();
-
-	res.json({ data: { status: true } });
+	res.json({ data: { error: 'Ocorreu algum erro' } });
 }
