@@ -22,5 +22,12 @@ export const privateRoute = async (req: Request, res: Response, next: NextFuncti
 		return;
 	}
 
+	const user = await User.findOne({ token });
+
+	if (!user) {
+		res.json({ notallowed: true });
+		return;
+	}
+
 	next();//Isso quer dizer que se vier um token como abc ele valida, mas sera testado no controller para saber se aquele token e realmente de alguem
 }
