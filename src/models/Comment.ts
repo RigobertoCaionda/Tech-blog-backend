@@ -1,19 +1,19 @@
 import { Schema, model, connection } from 'mongoose';
 
-type LikeType = {
+type CommentType = {
 	postId: string,
-	likedByUsers: string[]
+	commentedByUsers: object[]
 };
 
-const schema = new Schema<LikeType>({
+const schema = new Schema<CommentType>({
 	postId: { type: String, required: true },
-	likedByUsers: { type: [String], required: true }
+	commentedByUsers: { type: [Object], required: true }
 });
 
-const modelName: string = 'Like';
+const modelName = 'Comment';
 
 export default (connection && connection.models[modelName]) ?
 connection.models[modelName]
 :
-model<LikeType>(modelName, schema)
+model<CommentType>(modelName, schema)
 ;

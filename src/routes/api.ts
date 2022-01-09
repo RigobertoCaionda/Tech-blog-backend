@@ -16,5 +16,7 @@ router.get('/blog', PostController.getAll);
 router.post('/blog/add', Auth.privateRoute , PostController.insert);
 router.get('/blog/:id', PostController.getPost);
 router.put('/blog/:id/like', Auth.privateRoute, PostController.like);
+router.put('/blog/:id/comment', Auth.privateRoute, PostController.comment);
+router.put('/blog/:id/likeComment', Auth.privateRoute, PostController.likeComment);
 
 export default router;
