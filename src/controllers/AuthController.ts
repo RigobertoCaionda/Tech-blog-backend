@@ -1,74 +1,63 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import { validationResult, matchedData } from 'express-validator';
 import User from '../models/User';
 
-export const signup = async (req: Request, res: Response) => {
-	const errors = validationResult(req);
+class AuthController {
+	async signup(req: Request, res: Response) {
+		const errors = validationResult(req);
 
-	if (!errors.isEmpty()) {
-		res.json({ error: errors.mapped() });
-		return;
+		if (!errors.isEmpty()) {
+			res.json({ error: errors.mapped() });
+			return;
+		}
+
+		const { name, email, gender, password, confirmPassword } = matchedData(req);
+
+		if (password != confirmPassword) throw Error('confirm password invalid');
+
+		const existUser = await User.findOne({ email });
+		if (existUser) throw Error('email already in use');
+
+		const hash = await bcrypt.hash(password, 10);
+		const user = new User({
+			name,
+			email,
+			gender,
+			password: hash
+		});
+
+		const savedUser = await user.save();
+
+		const token = jwt.sign({ id: savedUser._id }, process.env.JWT_SECRET as string, {
+			expiresIn: '30m'
+		});
+
+		return res.status(200).json({ token });
 	}
 
-	const data = matchedData(req);
+	async signin(req: Request, res: Response) {
+		const errors = validationResult(req);
 
-	if (data.password !== data.confirmPassword) {
-		res.json({data: { error: 'Senhas não batem!' } });
-		return;
+		if (!errors.isEmpty()) {
+			res.json({ error: errors.mapped() });
+			return;
+		}
+
+		const { email, password } = matchedData(req);
+		const user = await User.findOne({ email });
+
+		if (!user) throw Error('user not found');
+
+		const passwordIsValid = await bcrypt.compare(password, user.password);
+		if (!passwordIsValid) throw Error('password invalid');
+
+		const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET as string, {
+			expiresIn: '30m'
+		});
+		return res.status(200).json({ token });
 	}
-
-	const user = await User.findOne({ email: data.email });
-
-	if (user) {
-		res.json({ data: { error: 'Email já existe!' } });
-		return;
-	}
-
-	const passwordHash = await bcrypt.hash(data.password, 10);
-	const payload = (Date.now() + Math.random()).toString();
-	const token = await bcrypt.hash(payload, 10);
-
-	const newUser = new User({
-		name: data.name,
-		email: data.email,
-		gender: data.gender,
-		password: passwordHash,
-		token
-	});
-	await newUser.save();
-	res.json({ data: { token } });
 }
 
-export const signin = async (req: Request, res: Response) => {
-	const errors = validationResult(req);
-
-	if (!errors.isEmpty()) {
-		res.json({ error: errors.mapped() });
-		return;
-	}
-
-	const data = matchedData(req);
-
-	const user = await User.findOne({ email: data.email });
-
-	if (!user) {
-		 res.json({ data: { error: 'E-mail e/ou senha errados!' } });
-         return;
-	}
-
-	const match = await bcrypt.compare(data.password, user.password);
-
-	if (!match) {
-		 res.json({error: 'E-mail e/ou senha errados!'});
-         return;
-	}
-
-	const payload = (Date.now() + Math.random()).toString();
-	const token = await bcrypt.hash(payload, 10);
-
-	user.token = token;
-	await user.save();
-
-	res.json({ data: { token, email: data.email } });
-}
+export default new AuthController();

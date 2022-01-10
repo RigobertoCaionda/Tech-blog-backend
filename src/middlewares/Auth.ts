@@ -1,33 +1,39 @@
 import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
 import User from '../models/User';
 
-export const privateRoute = async (req: Request, res: Response, next: NextFunction) => {
-	if (!req.query.token && !req.body.token) {
-		res.json({ notallowed: true });
-		return;
+type TokenPayload = {
+	id: string;
+};
+
+export const loginRequired = async (req: Request, res: Response, next: NextFunction) => {
+	const { authorization } = req.headers;
+	if (!authorization) throw Error('token is necessary');// Essa forma de if
+
+	const [, token] = authorization.split(' ');// Essa forma de ignorar a primeira propriedade
+	if (!token) throw Error('token is necessary');//Token, como vem afinal isso daqui
+
+	const { id } = jwt.verify(token, process.env.JWT_SECRET as string) as TokenPayload;// Daqui sai o id do user entao?
+
+	const user = await User.findById(id);
+	if (!user) throw Error('user not found');
+
+	req.body.userId = id;
+	next();
+}
+
+export const loginOptional = async (req: Request, res: Response, next: NextFunction) => {
+	const { authorization } = req.headers;
+
+	if (authorization) {
+		const [, token] = authorization.split(' ');
+		if (token) {
+			const { id } = jwt.verify(token, process.env.JWT_SECRET as string) as TokenPayload;
+			const user = await User.findById(id);
+			if (user) {
+				req.body.userId = user._id;// Pq nao passar o id tmbm assim como no de cima?
+			}
+		}
 	}
-
-	let token = '';
-
-	if (req.query.token) {
-		token = req.query.token as string;
-	}
-
-	if (req.body.token) {
-		token = req.body.token;
-	}
-
-	if (token == '') {
-		res.json({ notallowed: true });
-		return;
-	}
-
-	const user = await User.findOne({ token });
-
-	if (!user) {
-		res.json({ notallowed: true });
-		return;
-	}
-
-	next();//Isso quer dizer que se vier um token como abc ele valida, mas sera testado no controller para saber se aquele token e realmente de alguem
+	next();
 }
