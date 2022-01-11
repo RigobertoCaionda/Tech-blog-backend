@@ -20,9 +20,9 @@ class PostController {
 	async getAll(req: Request, res: Response) {}
 
 	async insert(req: Request, res: Response) {
-		const { title, desc, subject, text, userId } = req.body;
+		const { title, desc, subject, text, userId } = req.body;// O userId vem la do Auth.ts
 
-		if (!title || !Boolean(title.trim())) throw Error('data invalid');
+		if (!title || !Boolean(title.trim())) throw Error('data invalid');// Boolean('') retorna false e Boolean('a') retorna true
 		if (!desc || !Boolean(desc.trim())) throw Error('data invalid');
 		if (!text || text.length < 1) throw Error('data invalid');
 		if (!subject || subject.length < 1) throw Error('data invalid');
@@ -39,11 +39,13 @@ class PostController {
 
 		const info = await newPost.save();
 
+		//Salvando o registro na tabela de likes tmbm
 		const newLikeData = new Like();
 		newLikeData.postId = info._id;
 		newLikeData.likedByUsers = [];
 		await newLikeData.save();
 
+		//Salvando o registro na tabela de comments tmbm
 		const newCommentData = new Comment();
 		newCommentData.postId = info._id;
 		newCommentData.commentedByUsers = [];
@@ -68,8 +70,14 @@ class PostController {
 		const like = await Like.findOne({ postId: post._id }).exec();
 
 		if (like) {
-			const comment = await Comment.findOne({ postId: post._id }).exec();
-
+			const comment = await Comment.findOne({ postId: post._id }).exec(); // Se faz parte da tabela de likes e suposto que tmbm faca da tabela de comments, sao criadas juntas
+			for (let i in comment.commentedByUsers) { // Com isso agora sei se o usuario logado curtiu quais comentarios
+				if (comment.commentedByUsers[i].usersLiked.includes(userId.toString())) {// Quando vc quer comparar um objectId com string vc precisa transformar o objectId em string
+					comment.commentedByUsers[i].liked = true;
+				} else {
+					comment.commentedByUsers[i].liked = false;
+				}
+			}
 			return res.status(200).json({
 				data: {
 					id: post._id,
@@ -83,8 +91,11 @@ class PostController {
 					commentsList: comment.commentedByUsers,
 					views: post.views,
 					likes: post.likes,
-				},
+				}
 			});
+
+		} else { // E esperado que ache sempre, por isso se nao achar eu dou um erro 500 de algo deu errado
+			throw Error('unexpected process');
 		}
 	}
 
@@ -114,17 +125,17 @@ class PostController {
 					commentText,
 					usersLiked: [],
 					likes: 0,
-					dateCreated: new Date(),
+					dateCreated: new Date()
 				},
-				...comment.commentedByUsers,
-			];
+				...comment.commentedByUsers
+			]; // Poderia usar o unshift perfeitamente tmbm
 
 			await comment.save();
 
 			return res.json({ data: { status: true } });
+		} else {
+			throw Error('unexpected process');
 		}
-
-		return res.json({ data: { error: 'Ocorreu algum erro' } });
 	}
 
 	async like(req: Request, res: Response) {
@@ -138,7 +149,7 @@ class PostController {
 		if (!post) throw Error('post not found');
 
 		const like = await Like.findOne({ postId: id }).exec();
-		if (like) {
+		if (like) { 
 			if (!like.likedByUsers.includes(userId)) {
 				like.likedByUsers.push(userId);
 				post.likes++;
@@ -148,9 +159,9 @@ class PostController {
 			}
 
 			return res.json({ data: { status: true } });
+		} else {
+			throw Error('unexpected process');
 		}
-
-		return res.json({ data: { error: 'Ocorreu algum erro' } });
 	}
 
 	async likeComment(req: Request, res: Response) {
@@ -177,15 +188,21 @@ class PostController {
 
 					await comment.updateOne({
 						_id: comment._id,
-						commentedByUsers: comments,
+						commentedByUsers: comments
 					});
 
 					return res.json({ data: { status: true } });
+				} else {
+					throw Error('already liked');
 				}
-			}
-		}
 
-		return res.json({ data: { error: 'Ocorreu algum erro' } });
+			} else {
+				throw Error('id invalid');
+			}
+
+		} else {
+			throw Error('unexpected process');
+		}
 	}
 }
 

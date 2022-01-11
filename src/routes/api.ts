@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import AuthValidator from '../validators/AuthValidator';
-import AuthController from '../controllers/AuthController';//Ja nao e * as
+import AuthController from '../controllers/AuthController';
 import PostController from '../controllers/PostController';
 import * as Auth from '../middlewares/Auth';
 

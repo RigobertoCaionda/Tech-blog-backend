@@ -4,8 +4,8 @@ import jwt from 'jsonwebtoken';
 import { validationResult, matchedData } from 'express-validator';
 import User from '../models/User';
 
-class AuthController {
-	async signup(req: Request, res: Response) {
+class AuthController {// Para criar uma classe em js
+	async signup(req: Request, res: Response) {// Forma de criar as propriedades da classe
 		const errors = validationResult(req);
 
 		if (!errors.isEmpty()) {
@@ -18,9 +18,11 @@ class AuthController {
 		if (password != confirmPassword) throw Error('confirm password invalid');
 
 		const existUser = await User.findOne({ email });
+
 		if (existUser) throw Error('email already in use');
 
 		const hash = await bcrypt.hash(password, 10);
+
 		const user = new User({
 			name,
 			email,
@@ -32,7 +34,7 @@ class AuthController {
 
 		const token = jwt.sign({ id: savedUser._id }, process.env.JWT_SECRET as string, {
 			expiresIn: '30m'
-		});
+		});// Depois que ele salva o cadastro, cria um token para ele
 
 		return res.status(200).json({ token });
 	}
@@ -48,16 +50,18 @@ class AuthController {
 		const { email, password } = matchedData(req);
 		const user = await User.findOne({ email });
 
-		if (!user) throw Error('user not found');
+		if (!user) throw Error('invalid login');
 
 		const passwordIsValid = await bcrypt.compare(password, user.password);
-		if (!passwordIsValid) throw Error('password invalid');
+
+		if (!passwordIsValid) throw Error('invalid login');
 
 		const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET as string, {
 			expiresIn: '30m'
 		});
+		
 		return res.status(200).json({ token });
 	}
 }
 
-export default new AuthController();
+export default new AuthController();// Exportando a instancia dessa classe, como no java new AuthController()

@@ -1,19 +1,19 @@
-import express from 'express';//Nao precisa dos Request
+import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 
-import 'express-async-errors';//Permite trabalhar com erros
+import 'express-async-errors';//Para trabalhar com erros. Obs: Deve ficar antes das rotas
 
 import { resolve } from 'path';
 import fileupload from 'express-fileupload';
 
 import apiRoutes from './routes/api';
 import { mongoConnect } from './database/mongo';
-import { errorHandler } from './errors';//Funcao dos erros
+import { errorHandler } from './errors';//Funcao que lida com os erros
 
 dotenv.config();
 
-mongoConnect();//funcao que verifica se estamos devidamente conectados ao mongo
+mongoConnect();//Verifica se estamos devidamente conectados ao mongo
 
 const server = express();
 
@@ -25,8 +25,8 @@ server.use('/file', express.static(resolve(__dirname, '../public/media')));
 server.use('/', apiRoutes);
 server.use(errorHandler);
 
-server.use((req, res) => {//Pq ele nao precisa ser tipado
-	res.status(404).json({ data: { error: 'Endpoint não encontrado!' } });
+server.use((req, res) => {
+	res.status(404).json({ data: { error: 'Endpoint não encontrado' } });
 });
 
-server.listen(process.env.PORT ?? 3333);// pq disso e esse ??
+server.listen(process.env.PORT ?? 3333);// ?? em js pega o valor da esquerda, caso nao exista pega o da direita
