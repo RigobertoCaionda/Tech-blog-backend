@@ -33,7 +33,7 @@ class AuthController {// Para criar uma classe em js
 		const savedUser = await user.save();
 
 		const token = jwt.sign({ id: savedUser._id }, process.env.JWT_SECRET as string, {
-			expiresIn: '30m'
+			expiresIn: '2h'
 		});// Depois que ele salva o cadastro, cria um token para ele
 
 		return res.status(200).json({ token });
@@ -57,7 +57,7 @@ class AuthController {// Para criar uma classe em js
 		if (!passwordIsValid) throw Error('invalid login');
 
 		const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET as string, {
-			expiresIn: '30m'
+			expiresIn: '2h'
 		});
 		
 		return res.status(200).json({ token });
