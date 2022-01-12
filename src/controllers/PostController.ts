@@ -4,8 +4,43 @@ import Post from '../models/Post';
 import Like from '../models/Like';
 import Comment from '../models/Comment';
 
+type filtersType = {
+	status: boolean,
+	title?: string
+};
+
 class PostController {
-	async getAll(req: Request, res: Response) {}
+	async getAll(req: Request, res: Response) {
+		let { sort = 'asc', offset = 0, limit = 5, q, cat} = req.query;
+		let filters: filtersType = { status: true };
+		let total = 0;
+
+		if (q) {
+			filters.title = {'$regex': q, '$options': 'i'} as any;
+		}
+
+		const totalPosts = await Post.find(filters).exec();// Resultados sem paginacao
+		total = totalPosts.length;
+
+		const postData = await Post.find(filters)
+		.sort({ dateCreated: (sort == 'desc' ?-1:1) })
+		.skip(offset as number)
+		.limit(limit as number)
+		.exec(); // Resultado com paginacao
+
+		if (cat) {
+			
+			if (cat == 'mostViewed') {
+				//Fazer a funcao que organize pelos mais vistos
+			} 
+
+			if (cat == 'mostLiked') {
+				// Fazer a funcao que organize pelos mais curtidos
+			}
+		}
+		
+		res.json({ data: { postData, total } });
+	}
 
 	async insert(req: Request, res: Response) {
 		const { title, desc, subject, text, userId } = req.body;// O userId vem la do Auth.ts
@@ -16,6 +51,7 @@ class PostController {
 		if (!subject || subject.length < 1) throw Error('data invalid');
 
 		const newPost = new Post();
+		newPost.status = true;
 		newPost.title = title;
 		newPost.desc = desc;
 		newPost.subject = subject;
@@ -66,6 +102,15 @@ class PostController {
 					comment.commentedByUsers[i].liked = false;
 				}
 			}
+
+			for (let i in comment.commentedByUsers) {
+				if (comment.commentedByUsers[i].idUser == userId ? userId.toString() : false) {
+					comment.commentedByUsers[i].myComment = true;
+				} else {
+					comment.commentedByUsers[i].myComment = false;
+				}
+			}
+
 			return res.status(200).json({
 				data: {
 					id: post._id,
@@ -78,7 +123,7 @@ class PostController {
 					userLiked: userId ? like.likedByUsers.includes(userId) : false,
 					commentsList: comment.commentedByUsers,
 					views: post.views,
-					likes: post.likes,
+					likes: post.likes
 				}
 			});
 

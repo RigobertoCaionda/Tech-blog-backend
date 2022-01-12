@@ -24,6 +24,7 @@ class AuthController {// Para criar uma classe em js
 		const hash = await bcrypt.hash(password, 10);
 
 		const user = new User({
+			status: true,
 			name,
 			email,
 			gender,

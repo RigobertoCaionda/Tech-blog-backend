@@ -1,6 +1,7 @@
 import { Schema, model, connection } from 'mongoose';
 
 type PostType = {
+	status: boolean,
 	title: string,
 	dateCreated: Date,
 	desc: string,
@@ -12,6 +13,7 @@ type PostType = {
 };
 
 const schema = new Schema<PostType>({
+	status: { type: Boolean, required: true },
 	title: { type: String, required: true },
 	dateCreated: Date,
 	desc: { type: String, required: true },
