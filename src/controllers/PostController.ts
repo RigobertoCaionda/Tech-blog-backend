@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import Post from '../models/Post';
 import Like from '../models/Like';
 import Comment from '../models/Comment';
+import User from '../models/User';
 
 type filtersType = {
 	status: boolean,
@@ -119,6 +120,15 @@ class PostController {
 				} else {
 					comment.commentedByUsers[i].myComment = false;
 				}
+			}
+
+			for (let i in comment.commentedByUsers) {
+					const user = await User.findById(comment.commentedByUsers[i].idUser);
+					if (user.image) {
+						comment.commentedByUsers[i].image = `${process.env.BASE}/file/${user.image}`;
+					} else { 
+						comment.commentedByUsers[i].image = `${process.env.BASE}/file/default.jpg`;
+					}
 			}
 
 			return res.status(200).json({

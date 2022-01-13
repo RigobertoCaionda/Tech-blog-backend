@@ -1,11 +1,21 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { v4 as uuid } from 'uuid';
+import jimp from 'jimp';
 import { validationResult, matchedData } from 'express-validator';
 import User from '../models/User';
 
-class AuthController {// Para criar uma classe em js
-	async signup(req: Request, res: Response) {// Forma de criar as propriedades da classe
+class AuthController {
+	async signup(req: Request, res: Response) {
+
+		const addImage = async (buffer: any) => {
+			let newName = `${uuid()}.jpg`;
+			let tmpImg = await jimp.read(buffer);
+			tmpImg.cover(150, 150).quality(80).write(`./public/media/${newName}`);
+			return newName;
+		}
+
 		const errors = validationResult(req);
 
 		if (!errors.isEmpty()) {
@@ -30,6 +40,17 @@ class AuthController {// Para criar uma classe em js
 			gender,
 			password: hash
 		});
+
+		if (req.files && req.files.img) {//img e o nome do campo que vai ter o file na requisicao
+				if (['image/jpeg', 'image/jpg', 'image/png'].includes((req.files.img as any).mimetype)) {
+					let url = await addImage((req.files.img as any).data);
+					user.image = url;
+				} else {
+					throw Error('invalid file');
+				}
+		} else {
+			user.image = 'default.jpg';
+		}
 
 		const savedUser = await user.save();
 
