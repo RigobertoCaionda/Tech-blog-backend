@@ -26,16 +26,26 @@ class PostController {
 		.sort({ dateCreated: (sort == 'desc' ?-1:1) })
 		.skip(offset as number)
 		.limit(limit as number)
-		.exec(); // Resultado com paginacao
+		.exec(); // Resultados com paginacao
 
-		if (cat) {
-			
+		if (cat && !q) {
 			if (cat == 'mostViewed') {
-				//Fazer a funcao que organize pelos mais vistos
+				postData.sort((a, b) => b.views - a.views).slice(0, 5);
+				// o metodo sort pode receber uma funcao de comparacao, no nosso caso b - a esta a perguntar se b > a, quer dizer que ele vai ordenar de maior ao menor, no caso de a > b ordena na ordem inversa. o slice(0, 10) e para retornar so 10 itens
 			} 
 
 			if (cat == 'mostLiked') {
-				// Fazer a funcao que organize pelos mais curtidos
+				postData.sort((a, b) => b.likes - a.likes).slice(0, 5);
+			}
+		}
+
+		if (cat && q) {
+			if (cat == 'mostViewed') {
+				postData.sort((a, b) => b.views - a.views);
+			} 
+
+			if (cat == 'mostLiked') {
+				postData.sort((a, b) => b.likes - a.likes);
 			}
 		}
 		
