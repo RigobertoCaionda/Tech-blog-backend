@@ -28,6 +28,12 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, next) => {//Fun
 		case 'invalid login':
 			return res.status(400).json({ data: { error: 'Email e/ou senha errados' } });
 
+		case 'invalid password':
+			return res.status(400).json({ data: { error: 'Senha errada' } });
+
+		case 'knownPassWord invalid':
+			return res.status(400).json({ data: { error: 'Digite a sua palavra passe para continuar' } });
+
 		case 'user not found':
 			return res.status(400).json({ data: { error: 'Esse usuário não existe' } });
 

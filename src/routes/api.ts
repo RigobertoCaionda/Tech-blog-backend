@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import AuthValidator from '../validators/AuthValidator';
+import UserValidator from '../validators/UserValidator';
 import AuthController from '../controllers/AuthController';
 import PostController from '../controllers/PostController';
 import UserController from '../controllers/UserController';
@@ -20,6 +21,7 @@ router.get('/blog', PostController.getAll);
 router.get('/blog/:id', Auth.loginOptional, PostController.getPost);
 router.get('/user/posts', Auth.loginRequired, UserController.getPosts);
 router.post('/blog/add', Auth.loginRequired , PostController.insert);
+router.post('/user/editProfile', UserValidator.editProfile, Auth.loginRequired, UserController.edit);
 router.put('/blog/:id/like', Auth.loginRequired, LikeController.likePost);
 router.put('/blog/:id/comment', Auth.loginRequired, CommentController.commentPost);
 router.put('/blog/:id/likeComment', Auth.loginRequired, LikeController.likeComment);
