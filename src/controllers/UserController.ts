@@ -12,7 +12,8 @@ type UpdateType = {
 	email?: string,
 	gender?: string,
 	password?: string,
-	image?: string
+	image?: string,
+	status?: boolean
 }
 
 class UserController {
@@ -110,6 +111,15 @@ class UserController {
 				}
 		}
 
+		await User.findOneAndUpdate({ _id: userId }, { $set: updates });
+
+		res.json({ data: { status: true } });
+	}
+
+	async delete(req: Request, res: Response) {
+		let { userId } = req.body;
+		let updates: UpdateType = {};
+		updates.status = false;
 		await User.findOneAndUpdate({ _id: userId }, { $set: updates });
 
 		res.json({ data: { status: true } });

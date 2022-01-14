@@ -22,6 +22,9 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, next) => {//Fun
 		case 'data invalid':
 			return res.status(401).json({ data: { error: 'Requisição inválida' } });
 
+		case 'unauthorized post':
+			return res.status(401).json({ data: { error: 'Esse post não é seu' } });
+
 		case 'email already in use':
 			return res.status(400).json({ data: { error: 'Email já existe' } });
 

@@ -10,6 +10,13 @@ type filtersType = {
 	title?: string
 };
 
+type UpdateType = {
+	title?: string,
+	desc?: string,
+	subject?: string[],
+	text?: string[]
+};
+
 class PostController {
 	async getAll(req: Request, res: Response) {
 		let { sort = 'asc', offset = 0, limit = 5, q, cat} = req.query;
@@ -157,6 +164,50 @@ class PostController {
 		} else { // E esperado que ache sempre, por isso se nao achar eu dou um erro 500 de algo deu errado
 			throw Error('unexpected process');
 		}
+	}
+
+	async editPost(req: Request, res: Response) {
+		const { title, desc, subject, text, userId } = req.body;
+		const { id } = req.params;
+
+		if (!id) throw Error('without id');
+		if (!mongoose.Types.ObjectId.isValid(id)) throw Error('id invalid');
+
+		const post = await Post.findById(id);
+		if (!post) throw Error('post not found');
+		if (post.userId !== userId) throw Error('unauthorized post');
+
+		let updates: UpdateType = {};
+
+		if (title && title.trim() !== '') updates.title = title;
+		if (desc && desc.trim() !== '') updates.desc = desc;
+		if (text && text.length > 0) updates.text = text;
+		if (subject && subject.length > 0) updates.subject = subject;
+
+		if (title && title.trim() == '') throw Error('data invalid');
+		if (desc && desc.trim() == '') throw Error('data invalid');
+		if (text && text.length < 1) throw Error('data invalid');
+		if (subject && subject.length < 1) throw Error('data invalid');
+
+		await Post.findOneAndUpdate({ _id: id }, { $set: updates });
+
+		res.json({ data: { status: true } });
+	}
+
+	async delete(req: Request, res: Response) {
+		let { id } = req.params;
+		let { userId } = req.body;
+
+		if (!id) throw Error('without id');
+		if (!mongoose.Types.ObjectId.isValid(id)) throw Error('id invalid');
+
+		const post = await Post.findById(id);
+		if (!post) throw Error('post not found');
+		if (post.userId !== userId) throw Error('unauthorized post');
+
+		await Post.findByIdAndRemove(id);
+
+		res.json({ data: { status: true } });
 	}
 }
 
