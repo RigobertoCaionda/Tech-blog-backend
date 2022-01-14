@@ -106,24 +106,30 @@ class PostController {
 
 		if (like) {
 			const comment = await Comment.findOne({ postId: post._id }).exec(); // Se faz parte da tabela de likes e suposto que tmbm faca da tabela de comments, sao criadas juntas
-			for (let i in comment.commentedByUsers) { // Com isso agora sei se o usuario logado curtiu quais comentarios
+			const user = await User.findById(post.userId);
+			let userData  = { name: '', image: '' };
+			if (user) {
+				userData.name = user.name;
+				userData.image = `${process.env.BASE}/file/${user.image}`;
+			} else {// Se ele criou o post e depois deletou a conta
+				userData.name = 'Blog User';
+				userData.image = `${process.env.BASE}/file/default.jpg`;
+			}
+
+			for (let i in comment.commentedByUsers) {
 				if (comment.commentedByUsers[i].usersLiked.includes(userId ? userId.toString() : false)) {// Quando vc quer comparar um objectId com string vc precisa transformar o objectId em string
 					comment.commentedByUsers[i].liked = true;
 				} else {
 					comment.commentedByUsers[i].liked = false;
 				}
-			}
 
-			for (let i in comment.commentedByUsers) {
 				if (comment.commentedByUsers[i].idUser == userId ? userId.toString() : false) {
 					comment.commentedByUsers[i].myComment = true;
 				} else {
 					comment.commentedByUsers[i].myComment = false;
 				}
-			}
 
-			for (let i in comment.commentedByUsers) {
-					const user = await User.findById(comment.commentedByUsers[i].idUser);
+				const user = await User.findById(comment.commentedByUsers[i].idUser);
 					if (user.image) {
 						comment.commentedByUsers[i].image = `${process.env.BASE}/file/${user.image}`;
 					} else { 
@@ -143,7 +149,8 @@ class PostController {
 					userLiked: userId ? like.likedByUsers.includes(userId) : false,
 					commentsList: comment.commentedByUsers,
 					views: post.views,
-					likes: post.likes
+					likes: post.likes,
+					userData
 				}
 			});
 

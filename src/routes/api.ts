@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import AuthValidator from '../validators/AuthValidator';
 import AuthController from '../controllers/AuthController';
 import PostController from '../controllers/PostController';
+import UserController from '../controllers/UserController';
 import CommentController from '../controllers/CommentController';
 import LikeController from '../controllers/LikeController';
 import * as Auth from '../middlewares/Auth';
@@ -17,6 +18,7 @@ router.post('/user/signin', AuthValidator.signin, AuthController.signin);
 
 router.get('/blog', PostController.getAll);
 router.get('/blog/:id', Auth.loginOptional, PostController.getPost);
+router.get('/user/posts', Auth.loginRequired, UserController.getPosts);
 router.post('/blog/add', Auth.loginRequired , PostController.insert);
 router.put('/blog/:id/like', Auth.loginRequired, LikeController.likePost);
 router.put('/blog/:id/comment', Auth.loginRequired, CommentController.commentPost);
