@@ -18,7 +18,7 @@ type commentType = {
 class LikeController {
 	async likePost(req: Request, res: Response) {
 		const { id } = req.params;
-		const { userId, option } = req.body;
+		let { userId, option } = req.body;
 
 		if (!id) throw Error('without id');
 		if (!mongoose.Types.ObjectId.isValid(id)) throw Error('id invalid');
@@ -26,10 +26,12 @@ class LikeController {
 		const post = await Post.findById(id);
 		if (!post) throw Error('post not found');
 		if (!option) throw Error('data invalid');
+		if (option == 'true') option = true;
+		if (option == 'false') option = false;
 
 		const like = await Like.findOne({ postId: id }).exec();
 
-		if (option == 'true') {
+		if (option == true) {
 			if (like) { 
 			if (!like.likedByUsers.includes(userId)) {
 				like.likedByUsers.push(userId);
