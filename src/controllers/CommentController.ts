@@ -15,7 +15,8 @@ type ItemType = {
 	dateCreated: Date,
 	liked: boolean,
 	myComment: boolean,
-	image: string
+	image: string,
+	v: number
 }
 
 class CommentController {
@@ -45,7 +46,8 @@ class CommentController {
 					commentText,
 					usersLiked: [],
 					likes: 0,
-					dateCreated: new Date()
+					dateCreated: new Date(),
+					v: 0
 				},
 				...comment.commentedByUsers
 			]; // Poderia usar o unshift perfeitamente tmbm
@@ -79,6 +81,7 @@ class CommentController {
 			if (index !== -1) {
 				if (comment.commentedByUsers[index].idUser == userId) {
 					newCommentedByUsers[index].commentText = commentText;
+					newCommentedByUsers[index].v++;
 
 					await comment.updateOne({
 									_id: comment._id,
