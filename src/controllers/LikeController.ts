@@ -18,16 +18,19 @@ type commentType = {
 class LikeController {
 	async likePost(req: Request, res: Response) {
 		const { id } = req.params;
-		const { userId } = req.body;
+		const { userId, option } = req.body;
 
 		if (!id) throw Error('without id');
 		if (!mongoose.Types.ObjectId.isValid(id)) throw Error('id invalid');
 
 		const post = await Post.findById(id);
 		if (!post) throw Error('post not found');
+		if (!option) throw Error('data invalid');
 
 		const like = await Like.findOne({ postId: id }).exec();
-		if (like) { 
+
+		if (option == 'true') {
+			if (like) { 
 			if (!like.likedByUsers.includes(userId)) {
 				like.likedByUsers.push(userId);
 				post.likes++;
@@ -37,8 +40,24 @@ class LikeController {
 			}
 
 			return res.json({ data: { status: true } });
+			} else {
+				throw Error('unexpected process');
+			}
 		} else {
-			throw Error('unexpected process');
+			if (like) { 
+				if (like.likedByUsers.includes(userId)) {
+					const newLikedByUsers = like.likedByUsers.filter((item: string) => item !== userId);
+					like.likedByUsers = newLikedByUsers;
+					post.likes--;
+
+					await like.save();
+					await post.save();
+				}
+
+			return res.json({ data: { status: true } });
+			} else {
+				throw Error('unexpected process');
+			}
 		}
 	}
 
@@ -47,7 +66,6 @@ class LikeController {
 		const { commentId, userId } = req.body;
 
 		if (!commentId) throw Error('data invalid');
-
 		if (!id) throw Error('without id');
 		if (!mongoose.Types.ObjectId.isValid(id)) throw Error('id invalid');
 
