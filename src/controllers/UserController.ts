@@ -105,7 +105,7 @@ class UserController {
 				if (['image/jpeg', 'image/jpg', 'image/png'].includes((req.files.img as any).mimetype)) {
 					let url = await addImage((req.files.img as any).data);
 					const user =  await User.findById(userId);
-					await unlink(`./public/media/${user.image}`);
+					if(user.image !== 'default.jpg') await unlink(`./public/media/${user.image}`);
 					updates.image = url;
 				} else {
 					throw Error('invalid file');
