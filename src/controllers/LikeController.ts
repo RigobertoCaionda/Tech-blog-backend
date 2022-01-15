@@ -65,11 +65,14 @@ class LikeController {
 
 	async likeComment(req: Request, res: Response) {
 		const { id } = req.params;
-		const { commentId, userId } = req.body;
+		let { commentId, userId, option } = req.body;
 
 		if (!commentId) throw Error('data invalid');
 		if (!id) throw Error('without id');
 		if (!mongoose.Types.ObjectId.isValid(id)) throw Error('id invalid');
+		if (!option) throw Error('data invalid');
+		if (option == 'true') option = true;
+		if (option == 'false') option = false;
 
 		const post = await Post.findById(id);
 		if (!post) throw Error('post not found');
@@ -80,18 +83,38 @@ class LikeController {
 			const index = comments.findIndex((item) => item.id == commentId);
 
 			if (index != -1) {
-				if (!comments[index].usersLiked.includes(userId)) {
-					comments[index].likes++;
-					comments[index].usersLiked.push(userId);
 
-					await comment.updateOne({
-						_id: comment._id,
-						commentedByUsers: comments
-					});
+				if (option == true) {
+						if (!comments[index].usersLiked.includes(userId)) {
+							comments[index].likes++;
+							comments[index].usersLiked.push(userId);
 
-					return res.json({ data: { status: true } });
+							await comment.updateOne({
+								_id: comment._id,
+								commentedByUsers: comments
+							});
+
+						return res.json({ data: { status: true } });
+					} else {
+						throw Error('already liked');
+					}
 				} else {
-					throw Error('already liked');
+						if (comments[index].usersLiked.includes(userId)) {
+							comments[index].likes--;
+							const remLikeIndex = comments[index].usersLiked.
+								findIndex((item: string) => item == userId);
+
+							comments[index].usersLiked.splice(remLikeIndex, 1);
+
+							await comment.updateOne({
+								_id: comment._id,
+								commentedByUsers: comments
+							});
+
+						return res.json({ data: { status: true } });
+					} else {
+						throw Error('already disliked');
+					}
 				}
 
 			} else {

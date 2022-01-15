@@ -46,6 +46,9 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, next) => {//Fun
 		case 'already liked':
 			return res.status(400).json({ data: { status: 'você já curtiu esse comentário' } });
 
+		case 'already disliked':
+			return res.status(400).json({ data: { status: 'você já descurtiu esse comentário' } });
+
 		case 'invalid file':
 			return res.status(400).json({ data: { error: 'Arquivo inválido' } });
 
