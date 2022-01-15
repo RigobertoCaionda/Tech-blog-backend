@@ -27,6 +27,8 @@ router.put('/blog/:id', Auth.loginRequired, PostController.editPost);
 router.put('/blog/:id/like', Auth.loginRequired, LikeController.likePost);
 router.put('/blog/:id/comment', Auth.loginRequired, CommentController.commentPost);
 router.put('/blog/:id/likeComment', Auth.loginRequired, LikeController.likeComment);
+router.put('/blog/:id/editComment', Auth.loginRequired, CommentController.editComment);
 router.delete('/blog/:id', Auth.loginRequired, PostController.delete);
+router.delete('/blog/:id/comment', Auth.loginRequired, CommentController.delete);
 
 export default router;

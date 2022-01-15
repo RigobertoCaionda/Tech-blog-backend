@@ -25,11 +25,17 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, next) => {//Fun
 		case 'unauthorized post':
 			return res.status(401).json({ data: { error: 'Esse post não é seu' } });
 
+		case 'unauthorized comment':
+			return res.status(401).json({ data: { error: 'Esse comentário não é seu' } });
+
 		case 'email already in use':
 			return res.status(400).json({ data: { error: 'Email já existe' } });
 
 		case 'invalid login':
 			return res.status(400).json({ data: { error: 'Email e/ou senha errados' } });
+
+		case 'invalid commentId':
+			return res.status(400).json({ data: { error: 'Id de comentário inválido' } });
 
 		case 'invalid password':
 			return res.status(400).json({ data: { error: 'Senha errada' } });
