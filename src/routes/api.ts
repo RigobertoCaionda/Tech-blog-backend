@@ -18,6 +18,7 @@ router.post('/user/signup', AuthValidator.signup , AuthController.signup);
 router.post('/user/signin', AuthValidator.signin, AuthController.signin);
 
 router.get('/blog', PostController.getAll);
+router.get('/blog/search', PostController.search);
 router.get('/blog/:id', Auth.loginOptional, PostController.getPost);
 router.get('/user/posts', Auth.loginRequired, UserController.getPosts);
 router.post('/blog/add', Auth.loginRequired , PostController.insert);

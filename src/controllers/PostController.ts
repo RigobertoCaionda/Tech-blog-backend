@@ -209,6 +209,24 @@ class PostController {
 
 		res.json({ data: { status: true } });
 	}
+
+	async search(req: Request, res: Response) {
+		let { sort = 'asc', offset = 0, limit = 5, subject} = req.query;
+		let total = 0;
+
+		if (!subject) throw Error('data invalid');
+
+		const totalPosts = await Post.find({ subject }).exec();
+		total = totalPosts.length;
+
+		const postData = await Post.find({ subject })
+		.sort({ dateCreated: (sort == 'desc' ?-1:1) })
+		.skip(offset as number)
+		.limit(limit as number)
+		.exec();
+
+		res.json({ data: { postData, total } });
+	}
 }
 
 export default new PostController();
