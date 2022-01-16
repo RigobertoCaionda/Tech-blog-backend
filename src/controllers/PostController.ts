@@ -38,26 +38,23 @@ class PostController {
 
 		if (cat && !q) {
 			if (cat == 'mostViewed') {
-				postData.sort((a, b) => b.views - a.views).slice(0, 5);
-				// o metodo sort pode receber uma funcao de comparacao, no nosso caso b - a esta a perguntar se b > a, quer dizer que ele vai ordenar de maior ao menor, no caso de a > b ordena na ordem inversa. o slice(0, 10) e para retornar so 10 itens
+				totalPosts.sort((a, b) => b.views - a.views).slice(0, 4); // Se nao tiver q, ele deve retornar tudo e chamar os 5 mais vistos
+				// o metodo sort pode receber uma funcao de comparacao
+				return res.json({ data: { totalPosts, total } });
 			} 
 
 			if (cat == 'mostLiked') {
-				postData.sort((a, b) => b.likes - a.likes).slice(0, 5);
+				totalPosts.sort((a, b) => b.likes - a.likes).slice(0, 4);
+				return res.json({ data: { totalPosts, total } });
 			}
 		}
 
 		if (cat && q) {
-			if (cat == 'mostViewed') {
-				postData.sort((a, b) => b.views - a.views);
-			} 
-
-			if (cat == 'mostLiked') {
-				postData.sort((a, b) => b.likes - a.likes);
-			}
+			if (cat == 'mostViewed') postData.sort((a, b) => b.views - a.views);
+			if (cat == 'mostLiked') postData.sort((a, b) => b.likes - a.likes);
 		}
-		
-		res.json({ data: { postData, total } });
+
+		return res.json({ data: { postData, total } });
 	}
 
 	async insert(req: Request, res: Response) {
@@ -155,6 +152,7 @@ class PostController {
 					likedByUsers: like.likedByUsers,
 					userLiked: userId ? like.likedByUsers.includes(userId) : false,
 					commentsList: comment.commentedByUsers,
+					totalComments: comment.commentedByUsers.length,
 					views: post.views,
 					likes: post.likes,
 					userData
@@ -205,6 +203,12 @@ class PostController {
 		if (!post) throw Error('post not found');
 		if (post.userId !== userId) throw Error('unauthorized post');
 
+		const comment = await Comment.findOne({ postId: id }).exec();
+		const like = await Like.findOne({ postId: id }).exec();
+		if (!comment || !like) throw Error('unexpected process');
+
+		await Comment.findByIdAndRemove(comment._id);
+		await Like.findByIdAndRemove(like._id);
 		await Post.findByIdAndRemove(id);
 
 		res.json({ data: { status: true } });
