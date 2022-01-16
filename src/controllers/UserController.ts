@@ -118,10 +118,11 @@ class UserController {
 	}
 
 	async delete(req: Request, res: Response) {
-		let { userId } = req.body;
-		let updates: UpdateType = {};
-		updates.status = false;
-		await User.findOneAndUpdate({ _id: userId }, { $set: updates });
+		const { userId } = req.body;
+		const user =  await User.findById(userId);
+		
+		if(user.image !== 'default.jpg') await unlink(`./public/media/${user.image}`);
+		await User.findByIdAndRemove(userId);
 
 		res.json({ data: { status: true } });
 	}

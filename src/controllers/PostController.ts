@@ -134,7 +134,7 @@ class PostController {
 				}
 
 				const user = await User.findById(comment.commentedByUsers[i].idUser);
-					if (user.image) {
+					if (user && user.image) {
 						comment.commentedByUsers[i].image = `${process.env.BASE}/file/${user.image}`;
 					} else { 
 						comment.commentedByUsers[i].image = `${process.env.BASE}/file/default.jpg`;
