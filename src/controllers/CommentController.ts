@@ -37,8 +37,7 @@ class CommentController {
 		if (comment) {
 			const user = await User.findById(userId).exec();
 
-			comment.commentedByUsers = [
-				{
+			const newComment = {
 					id: (Date.now() + Math.random()).toString(),
 					idUser: userId,
 					name: user.name,
@@ -48,13 +47,13 @@ class CommentController {
 					likes: 0,
 					dateCreated: new Date(),
 					v: 0
-				},
-				...comment.commentedByUsers
-			]; // Poderia usar o unshift perfeitamente tmbm
+				};
+
+			comment.commentedByUsers = [newComment, ...comment.commentedByUsers]; // Poderia tmbm usar o unshift
 
 			await comment.save();
 
-			return res.json({ data: { status: true } });
+			return res.json({ data: { comment: newComment, image: user.image, status: true } });
 		} else {
 			throw Error('unexpected process');
 		}

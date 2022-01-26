@@ -27,6 +27,7 @@
     "@types/jsonwebtoken": "^8.5.6",
     "@types/mongoose": "^5.11.97",
     "@types/node": "^17.0.0",
+    "@types/sequelize": "^4.28.11",
     "@types/uuid": "^8.3.4"
   },
   "dependencies": {
@@ -40,6 +41,8 @@
     "jimp": "^0.16.1",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.1.5",
+    "mysql2": "^2.3.3",
+    "sequelize": "^6.13.0",
     "uuid": "^8.3.2"
   }
 }

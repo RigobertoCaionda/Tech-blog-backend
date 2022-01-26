@@ -38,14 +38,14 @@ class PostController {
 
 		if (cat && !q) {
 			if (cat == 'mostViewed') {
-				totalPosts.sort((a, b) => b.views - a.views).slice(0, 4); // Se nao tiver q, ele deve retornar tudo e chamar os 5 mais vistos
+				let totMostViewed = totalPosts.sort((a, b) => b.views - a.views).slice(0, 5); // Se nao tiver q, ele deve retornar tudo e chamar os 5 mais vistos
 				// o metodo sort pode receber uma funcao de comparacao
-				return res.json({ data: { totalPosts, total } });
+				return res.json({ data: { postData: totMostViewed, total: 1 } });
 			} 
 
 			if (cat == 'mostLiked') {
-				totalPosts.sort((a, b) => b.likes - a.likes).slice(0, 4);
-				return res.json({ data: { totalPosts, total } });
+				let totMostLiked = totalPosts.sort((a, b) => b.likes - a.likes).slice(0, 5);
+				return res.json({ data: { postData: totMostLiked, total: 1 } });
 			}
 		}
 
@@ -103,6 +103,27 @@ class PostController {
 		const post = await Post.findById(id);
 		if (!post) throw Error('post not found');
 
+		const totalPosts = await Post.find({ status: true }).exec(); //retornar todos os posts para mostrar proximo e anterior
+
+		let prevNextArray = [];
+		let index = totalPosts.findIndex((item) => item._id == id);
+		if (index !== -1) {
+			if (totalPosts[index + 1] === undefined) {
+				prevNextArray.push(totalPosts[0]);
+			} else {
+				prevNextArray.push(totalPosts[index + 1]);
+			}
+
+			if (totalPosts[index - 1] === undefined) {
+				prevNextArray.push(totalPosts[totalPosts.length - 1]);
+			} else {
+				prevNextArray.push(totalPosts[index - 1]);
+			}
+
+		} else {
+			throw Error('unexpected process');
+		}
+
 		post.views++;
 		await post.save();
 
@@ -116,7 +137,7 @@ class PostController {
 				userData.name = user.name;
 				userData.image = `${process.env.BASE}/file/${user.image}`;
 			} else {// Se ele criou o post e depois deletou a conta
-				userData.name = 'Blog User';
+				userData.name = 'Usuário do Blog';
 				userData.image = `${process.env.BASE}/file/default.jpg`;
 			}
 
@@ -155,11 +176,12 @@ class PostController {
 					totalComments: comment.commentedByUsers.length,
 					views: post.views,
 					likes: post.likes,
-					userData
+					userData,
+					prevNextArray
 				}
 			});
 
-		} else { // E esperado que ache sempre, por isso se nao achar eu dou um erro 500 de algo deu errado
+		} else { 
 			throw Error('unexpected process');
 		}
 	}

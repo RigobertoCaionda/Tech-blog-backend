@@ -47,13 +47,13 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, next) => {//Fun
 			return res.status(400).json({ data: { error: 'Esse usuário não existe' } });
 
 		case 'confirm password invalid':
-			return res.status(400).json({ data: { error: 'Confirmação de senha inválida' } });
+			return res.status(400).json({ data: { error: 'As senhas não batem' } });
 
 		case 'already liked':
-			return res.status(400).json({ data: { status: 'você já curtiu esse comentário' } });
+			return res.status(400).json({ data: { statusError: 'você já curtiu esse comentário' } });
 
 		case 'already disliked':
-			return res.status(400).json({ data: { status: 'você já descurtiu esse comentário' } });
+			return res.status(400).json({ data: { statusError: 'você já descurtiu esse comentário' } });
 
 		case 'invalid file':
 			return res.status(400).json({ data: { error: 'Arquivo inválido' } });

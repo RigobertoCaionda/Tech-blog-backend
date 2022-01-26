@@ -1,5 +1,4 @@
 import { Router, Request, Response } from 'express';
-import AuthValidator from '../validators/AuthValidator';
 import UserValidator from '../validators/UserValidator';
 import AuthController from '../controllers/AuthController';
 import PostController from '../controllers/PostController';
@@ -14,8 +13,8 @@ router.get('/ping', (req: Request, res: Response) => {
 	res.json({ pong: true });
 });
 
-router.post('/user/signup', AuthValidator.signup , AuthController.signup);
-router.post('/user/signin', AuthValidator.signin, AuthController.signin);
+router.post('/user/signup', AuthController.signup);
+router.post('/user/signin', AuthController.signin);
 
 router.get('/blog', PostController.getAll);
 router.get('/blog/search', PostController.search);

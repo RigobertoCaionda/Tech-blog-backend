@@ -25,7 +25,7 @@ class LikeController {
 
 		const post = await Post.findById(id);
 		if (!post) throw Error('post not found');
-		if (!option) throw Error('data invalid');
+		if (option === undefined) throw Error('data invalid');
 		if (option == 'true') option = true;
 		if (option == 'false') option = false;
 
@@ -70,7 +70,7 @@ class LikeController {
 		if (!commentId) throw Error('data invalid');
 		if (!id) throw Error('without id');
 		if (!mongoose.Types.ObjectId.isValid(id)) throw Error('id invalid');
-		if (!option) throw Error('data invalid');
+		if (option === undefined) throw Error('data invalid');
 		if (option == 'true') option = true;
 		if (option == 'false') option = false;
 

@@ -3,7 +3,6 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { v4 as uuid } from 'uuid';
 import jimp from 'jimp';
-import { validationResult, matchedData } from 'express-validator';
 import User from '../models/User';
 
 class AuthController {
@@ -16,14 +15,13 @@ class AuthController {
 			return newName;
 		}
 
-		const errors = validationResult(req);
+		const { name, email, gender, password, confirmPassword } = req.body;
 
-		if (!errors.isEmpty()) {
-			res.json({ error: errors.mapped() });
-			return;
-		}
-
-		const { name, email, gender, password, confirmPassword } = matchedData(req);
+		if (!name || !Boolean(name.trim()) || name.length < 2) throw Error('data invalid');
+		if (!email || !Boolean(email.trim())) throw Error('data invalid');
+		if (!gender || !Boolean(gender.trim())) throw Error('data invalid');
+		if (!password || !Boolean(password.trim()) || password.length < 8) throw Error('data invalid');
+		if (!confirmPassword || !Boolean(confirmPassword.trim())) throw Error('data invalid');
 
 		if (password != confirmPassword) throw Error('confirm password invalid');
 
@@ -56,20 +54,15 @@ class AuthController {
 
 		const token = jwt.sign({ id: savedUser._id }, process.env.JWT_SECRET as string, {
 			expiresIn: '2h'
-		});// Depois que ele salva o cadastro, cria um token para ele
+		});
 
 		return res.status(200).json({ token });
 	}
 
 	async signin(req: Request, res: Response) {
-		const errors = validationResult(req);
 
-		if (!errors.isEmpty()) {
-			res.json({ error: errors.mapped() });
-			return;
-		}
+		const { email, password } = req.body;
 
-		const { email, password } = matchedData(req);
 		const user = await User.findOne({ email });
 
 		if (!user) throw Error('invalid login');
