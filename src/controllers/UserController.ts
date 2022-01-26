@@ -21,6 +21,7 @@ class UserController {
 		let { sort = 'asc', offset = 0, limit = 5 } = req.query;
 		let { userId } = req.body;
 		let total = 0;
+		const user = await User.findById(userId);
 		const totalPosts = await Post.find({ userId }).exec();
 		total = totalPosts.length;
 
@@ -30,7 +31,7 @@ class UserController {
 		.limit(limit as number)
 		.exec();
 
-		res.json({ data: { postData, total } });
+		res.json({ data: { postData, total, idUser: user._id } });
 	}
 
 	async edit(req: Request, res: Response) {
