@@ -237,7 +237,7 @@ class PostController {
 	}
 
 	async search(req: Request, res: Response) {
-		let { sort = 'asc', offset = 0, limit = 5, subject} = req.query;
+		let { sort = 'asc', offset = 0, limit = 5, subject } = req.query;
 		let total = 0;
 
 		if (!subject) throw Error('data invalid');

@@ -34,8 +34,14 @@ class UserController {
 		res.json({ data: { postData, total, idUser: user._id } });
 	}
 
+	async getUserInfo (req: Request, res: Response) {
+		const { userId } = req.body;
+		const user = await User.findById(userId);
+		res.json({ data: user });
+	}
+
 	async edit(req: Request, res: Response) {
-		let { userId } = req.body;
+		const { name, email, gender, password, confirmPassword, knownPassWord, userId } = req.body;
 
 		const addImage = async (buffer: any) => {
 			let newName = `${uuid()}.jpg`;
@@ -44,14 +50,6 @@ class UserController {
 			return newName;
 		}
 
-		const errors = validationResult(req);
-
-		if (!errors.isEmpty()) {
-			res.json({ error: errors.mapped() });
-			return;
-		}
-
-		const { name, email, gender, password, confirmPassword, knownPassWord } = matchedData(req);
 		let updates: UpdateType = {};
 
 		if (name) {

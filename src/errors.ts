@@ -41,7 +41,7 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, next) => {//Fun
 			return res.status(400).json({ data: { error: 'Senha errada' } });
 
 		case 'knownPassWord invalid':
-			return res.status(400).json({ data: { error: 'Digite a sua palavra passe para continuar' } });
+			return res.status(400).json({ data: { error: 'Digite a sua senha atual para continuar' } });
 
 		case 'user not found':
 			return res.status(400).json({ data: { error: 'Esse usuário não existe' } });
